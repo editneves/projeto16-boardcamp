@@ -1,8 +1,3 @@
-// listCustomers,
-//     CustomersById,
-//     createCustomers,
-//     updateCustomers,
-
 import { db } from "../database/database.connection.js";
 
 export async function listCustomers(req, res) {
@@ -47,16 +42,16 @@ export async function createCustomers(req, res) {
       SELECT * FROM customers
       `);
 
-    let customersID = 1;
+    let customerId = 1;
     if (list.rows.length !== 0) {
-      customersID = list.rows[list.rows.length - 1].id + 1;
+      customerId = list.rows[list.rows.length - 1].id + 1;
     }
 
     const customer = await db.query(
       `
       INSERT INTO customers(id, "name", "phone", "cpf", "birthday")
       VALUES ($1, $2, $3, $4, $5);`,
-      [customersID, name, phone, cpf, birthday]
+      [customerId, name, phone, cpf, birthday]
     );
 
     console.log(customer);

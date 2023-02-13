@@ -26,16 +26,16 @@ export async function createGame(req, res) {
     SELECT * FROM games
     `);
 
-    let gamesID = 1;
+    let gameId = 1;
     if (list.rows.length !== 0) {
-      gamesID = list.rows[list.rows.length - 1].id + 1;
+      gameId = list.rows[list.rows.length - 1].id + 1;
     }
 
     const game = await db.query(
       `
     INSERT INTO games(id, name, image, "stockTotal", "pricePerDay")
     VALUES ($1, $2, $3, $4, $5);`,
-      [gamesID, name, image, stockTotal, pricePerDay]
+      [gameId, name, image, stockTotal, pricePerDay]
     );
 
     console.log(game);
