@@ -11,5 +11,5 @@ server.use(cors());
 server.use(express.json());
 server.use(routers);
 
-const port = process.env.PORT || 4010;
+const port = process.env.PORT || 5004;
 server.listen(port, () => console.log(`Server running in port: ${port}`));
