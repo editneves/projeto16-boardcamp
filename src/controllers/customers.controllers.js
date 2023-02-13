@@ -63,30 +63,30 @@ export async function createCustomers(req, res) {
 }
 
 export async function updateCustomers(req, res) {
-    const customerId = Number(req.params.id);
-    console.log(customerId)
+  const customerId = Number(req.params.id)
+  const { name, phone, cpf, birthday } = req.body
+
   try {
-    // const cpfExist = (
-    //     'SELECT * FROM customers WHERE cpf = $1 AND id <> $2',
-    //     [cpf, customerId]
-    //   );
-    //   console.log(cpf,customerId)
-    // if (cpfExist.rowCount > 0) {
-    //   return res.sendStatus(409);
-    // }
-    console.log(customerId)
-    const updateCustomer = await db.query(
-      "UPDATE customers SET name = $2, phone = $3, cpf = $4, birthday = $5 WHERE id = $1",
-      [customerId, name, phone, cpf, birthday]
-    ); 
+    const cpfExist = await db.query(
+      "SELECT * FROM customers WHERE cpf = $1 AND id = $2",
+      [cpf, customerId]
+    );
 
-    console.log(name, phone, cpf, birthday, customerId)
-
-    if (updateCustomer.rowCount === 0) {
-      return res.sendStatus(400);
+    if (cpfExist.rows.length === 0) {
+      return res.sendStatus(409);
     }
-    res.sendStatus(200);
+
+    const updateCustomer = await db.query(
+      "UPDATE customers SET name = $1, phone = $2, cpf = $3, birthday = $4 WHERE id = $5",
+      [name, phone, cpf, birthday, customerId]
+    )
+    console.log(updateCustomer)
+    if (updateCustomer.rowCount === 0) {
+      return res.sendStatus(400)
+    }
+    res.sendStatus(200)
   } catch (error) {
+    console.log(error);
     res.sendStatus(500);
   }
 }
