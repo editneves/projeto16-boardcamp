@@ -61,76 +61,77 @@ export async function createRentals(req, res) {
   }
 }
 
-// export async function finalizeRental(req, res) {
-//   const rentalId = Number(req.params.id);
-//   console.log("a");
-//   try {
-//     const rentalIdExist = await db.query(
-//       "SELECT * FROM rentals WHERE id = $1",
-//       [rentalId]
-//     );
-//     if (!rentalIdExist.rowCount > 0) {
-//       return res.sendStatus(404);
-//     }
+export async function finalizeRental(req, res) {
+  const rentalId = Number(req.params.id);
 
-//     const list = await db.query(`
-//         SELECT * FROM rentals
-//         `);
+  try {
+    const rentalIdExist = await db.query(
+      "SELECT * FROM rentals WHERE id = $1",
+      [rentalId]
+    );
+    if (!rentalIdExist.rowCount > 0) {
+      return res.sendStatus(404);
+    }
 
-//     let rentalsID = 1;
-//     if (list.rows.length !== 0) {
-//       rentalsID = list.rows[list.rows.length - 1].id + 1;
-//     }
-//     const rentalUpdateQuery = `
-//       UPDATE rentals
-//       SET "returnDate" = NOW(),
-//           "delayFee" = CASE
-//                           WHEN EXTRACT(DAY FROM age(NOW(), "rentDate")) > "daysRented"
-//                           THEN ("originalPrice" / "daysRented") * (EXTRACT(DAY FROM age(NOW(), "rentDate")) - "daysRented")
-//                           ELSE NULL
-//                        END
-//       WHERE "id" = $1 AND "returnDate" IS NULL;
-//       `;
-//     const rentalUpdate = await db.query(rentalUpdateQuery, [rentalId]);
-//     if (rentalUpdate.rowCount === 1) {
-//       return res.sendStatus(200);
-//     } else {
-//       return res.sendStatus(400);
-//     }
-//   } catch (error) {
-//     res.status(500).send(error.message);
-//   }
-// }
+    const list = await db.query(`
+        SELECT * FROM rentals
+        `);
 
-// export async function deleteRental(req, res) {
-//   const rentalId = Number(req.params.id);
-//   if (!rentalId || rentalId < 1 || !Number.isSafeInteger(rentalId)) {
-//     return res.sendStatus(400);
-//   }
-//   try {
-//     const rentalIdExist = await db.query(
-//       "SELECT * FROM rentals WHERE id = $1",
-//       [rentalId]
-//     );
-//     if (!rentalIdExist.rowCount > 0) {
-//       return res.sendStatus(404);
-//     }
-//     const finalizedRent = await db.query(
-//       'SELECT * FROM rentals WHERE id = $1 AND "returnDate" IS NOT NULL',
-//       [rentalId]
-//     );
-//     if (finalizedRent.rowCount > 0) {
-//       return res.sendStatus(400);
-//     }
+    let rentalsID = 1;
+    if (list.rows.length !== 0) {
+      rentalsID = list.rows[list.rows.length - 1].id + 1;
+    }
+    const rentalUpdateQuery = `
+      UPDATE rentals
+      SET "returnDate" = NOW(),
+          "delayFee" = CASE
+                          WHEN EXTRACT(DAY FROM age(NOW(), "rentDate")) > "daysRented"
+                          THEN ("originalPrice" / "daysRented") * (EXTRACT(DAY FROM age(NOW(), "rentDate")) - "daysRented")
+                          ELSE NULL
+                       END
+      WHERE "id" = $1 AND "returnDate" IS NULL;
+      `;
 
-//     const deleteRent = await db.query("DELETE FROM rentals WHERE id = $1", [
-//       rentalId,
-//     ]);
-//     if (deleteRent.rowCount === 1) {
-//       return res.sendStatus(200);
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.sendStatus(500);
-//   }
-// }
+    const rentalUpdate = await db.query(rentalUpdateQuery, [rentalId]);
+    if (rentalUpdate.rowCount === 1) {
+      return res.sendStatus(200);
+    } else {
+      return res.sendStatus(400);
+    }
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+}
+
+export async function deleteRental(req, res) {
+  const rentalId = Number(req.params.id);
+  if (!rentalId || rentalId < 1 || !Number.isSafeInteger(rentalId)) {
+    return res.sendStatus(400);
+  }
+  try {
+    const rentalIdExist = await db.query(
+      "SELECT * FROM rentals WHERE id = $1",
+      [rentalId]
+    );
+    if (!rentalIdExist.rowCount > 0) {
+      return res.sendStatus(404);
+    }
+    const finalizedRent = await db.query(
+      'SELECT * FROM rentals WHERE id = $1 AND "returnDate" IS NOT NULL',
+      [rentalId]
+    );
+    if (finalizedRent.rowCount > 0) {
+      return res.sendStatus(400);
+    }
+
+    const deleteRent = await db.query("DELETE FROM rentals WHERE id = $1", [
+      rentalId,
+    ]);
+    if (deleteRent.rowCount === 1) {
+      return res.sendStatus(200);
+    }
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+}
