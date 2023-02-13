@@ -1,12 +1,17 @@
 import { db } from "../database/database.connection.js";
 
-//usar joi encadeado
 export async function listRentals(req, res) {
   try {
     const listRentals = await db.query(`
-    SELECT * FROM rentals
-    `);
-
+    SELECT
+    rentals.*,
+    json_build_object('id', customers.id, 'name', customers.name) AS customer,
+    json_build_object('id', games.id, 'name', games.name) AS game
+  FROM
+    rentals
+    JOIN customers ON rentals."customerId" = customers.id
+    JOIN games ON rentals."gameId" = games.id;
+  `);
     res.send(listRentals.rows);
   } catch (error) {
     res.status(500).send(error.message);
@@ -15,20 +20,20 @@ export async function listRentals(req, res) {
 
 export async function createRentals(req, res) {
   const { customerId, gameId, daysRented } = req.body;
-  console.log("a");
+
   try {
     const customerIdExist = await db.query(
       "SELECT * FROM customers WHERE id = $1",
       [customerId]
     );
-    if (customerIdExist.rowCount < 0) {
+    if (!customerIdExist.rowCount > 0) {
       return res.sendStatus(400);
     }
 
     const gameIdExist = await db.query("SELECT * FROM games WHERE id = $1", [
       gameId,
     ]);
-    if (gameIdExist.rowCount < 0) {
+    if (!gameIdExist.rowCount > 0) {
       return res.sendStatus(400);
     }
 
